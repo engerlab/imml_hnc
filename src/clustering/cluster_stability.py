@@ -1,6 +1,5 @@
 import itertools
 import os
-
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
@@ -50,14 +49,16 @@ embedding_clusters_permutation = pd.read_csv(os.path.join("results_v2_permodalit
                                                           "embedding_clusters_permutation.csv"
                                                           ))
 embedding_clusters_permutation["IDs"] = embedding_clusters_permutation["IDs"].apply(lambda x: eval(x))
-embedding_clusters_permutation["Labels"] = embedding_clusters_permutation["Labels"].apply(lambda x: [int(i) for i in x.strip("[]").split()])
+embedding_clusters_permutation["Labels"] = embedding_clusters_permutation["Labels"].apply(lambda x: eval(x))
 ids_cache = {llm: get_Xs_ids(llm=llm)[1] for llm in llms}
+iterators = itertools.product(llms, N_CLUSTERS_LIST, ALGS_DICT.keys())
+iterators = list(iterators)
 n_jobs = 20
-cluster_stability = Parallel(n_jobs=n_jobs)(
+cluster_stability = Parallel(n_jobs=n_jobs, return_as="generator_unordered")(
     delayed(run_stability)(llm=llm, n_cluster=n_cluster, alg=alg)
-    for llm,n_cluster,alg  in tqdm(itertools.product(llms, N_CLUSTERS_LIST, ALGS_DICT.keys()))
+    for llm,n_cluster,alg  in tqdm(iterators, total=len(iterators))
 )
-
+cluster_stability = list(cluster_stability)
 embedding_clusters = [stability_dict[1] for stability_dict in cluster_stability]
 cluster_stability = [stability_dict[0] for stability_dict in cluster_stability]
 cluster_stability = pd.DataFrame(cluster_stability).sort_values("AMI", ascending=False)

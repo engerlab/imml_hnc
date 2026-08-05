@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 import pandas as pd
 
@@ -44,3 +43,11 @@ def get_Xs_ids(llm):
             ids = Xs[0].index.to_list()
             break
     return Xs, ids
+
+
+def prepare_Xs(Xs):
+    half = Xs.shape[1] // 2
+    Xs = [Xs.iloc[:, :half], Xs.iloc[:, -half:]]
+    for X in Xs:
+        X[X.eq(0).all(axis=1)] = np.nan
+    return Xs
