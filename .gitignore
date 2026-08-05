@@ -9,6 +9,24 @@ __pycache__/
 # csv files
 *.csv
 
+# pkl files
+*.pkl
+
+# pdf files
+*.pdf
+
+# svg files
+*.svg
+
+# txt files
+*.txt
+
+# png files
+*.png
+
+# npz files
+*.npz
+
 # Distribution / packaging
 .Python
 build/
